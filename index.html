@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>All-in-One QR Code Generator</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    :root {
+      --bg-color: #ffffff;
+      --text-color: #111111;
+      --primary-color: #0d6efd;
+      --input-bg: #f0f2f5;
+    }
+    [data-theme="dark"] {
+      --bg-color: #121212;
+      --text-color: #e0e0e0;
+      --primary-color: #66b0ff;
+      --input-bg: #1e1e1e;
+    }
+
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      margin: 0;
+      background-color: var(--bg-color);
+      color: var(--text-color);
+      text-align: center;
+      transition: all 0.3s ease;
+    }
+
+    header {
+      background: var(--primary-color);
+      color: white;
+      padding: 1rem;
+      font-size: 1.5rem;
+      font-weight: bold;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    #themeToggle {
+      background: white;
+      color: var(--primary-color);
+      border: none;
+      padding: 0.5rem 1rem;
+      border-radius: 5px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    .tabs {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      background: #e9ecef;
+    }
+
+    .tab-button {
+      flex: 1 1 auto;
+      padding: 1rem;
+      cursor: pointer;
+      background: #e9ecef;
+      border: none;
+      font-size: 1rem;
+    }
+
+    .tab-button.active {
+      background: var(--primary-color);
+      color: white;
+    }
+
+    .tab-content {
+      display: none;
+      max-width: 600px;
+      margin: auto;
+      padding: 1.5rem;
+      text-align: left;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    label {
+      font-weight: bold;
+    }
+
+    input, select, textarea, button {
+      width: 100%;
+      padding: 0.75rem;
+      margin-top: 0.25rem;
+      margin-bottom: 1rem;
+      font-size: 1rem;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      background: var(--input-bg);
+      color: var(--text-color);
+    }
+
+    button {
+      background: var(--primary-color);
+      color: white;
+      border: none;
+    }
+
+    button:hover {
+      background: #0b5ed7;
+    }
+
+    .download-link {
+      display: none;
+      margin-top: 0.5rem;
+      font-weight: bold;
+      text-align: center;
+      display: inline-block;
+    }
+
+    .qr-container {
+      margin-top: 1rem;
+      text-align: center;
+    }
+  </style>
+</head>
+<body data-theme="light">
+  <header>
+    <span>All-in-One QR Code Generator</span>
+    <button id="themeToggle" onclick="toggleTheme()">🌙 Dark Mode</button>
+  </header>
+
+  <div class="tabs">
+    <button class="tab-button active" onclick="switchTab('textTab', this)">📝 Text</button>
+    <button class="tab-button" onclick="switchTab('wifiTab', this)">📶 Wi-Fi</button>
+    <button class="tab-button" onclick="switchTab('emailTab', this)">📧 Email</button>
+    <button class="tab-button" onclick="switchTab('utmTab', this)">🌐 UTM URL</button>
+    <button class="tab-button" onclick="switchTab('eventTab', this)">🗓️ Event</button>
+    <button class="tab-button" onclick="switchTab('vcardTab', this)">🪪 vCard</button>
+  </div>
+
+  <!-- Tab 1 -->
+  <div class="tab-content active" id="textTab">
+    <label for="textInput">Enter any text or URL:</label>
+    <input type="text" id="textInput" placeholder="e.g., https://example.com">
+    <button onclick="generateQR('textInput', 'qrcode', 'textDownload')">Generate QR</button>
+    <div id="qrcode" class="qr-container"></div>
+    <a id="textDownload" class="download-link" download="text-qr.png">Download QR</a>
+  </div>
+
+  <!-- Tab 2 -->
+  <div class="tab-content" id="wifiTab">
+    <label for="ssid">Wi-Fi SSID:</label>
+    <input type="text" id="ssid">
+    <label for="password">Wi-Fi Password:</label>
+    <input type="text" id="password">
+    <label for="encryption">Encryption Type:</label>
+    <select id="encryption">
+      <option value="WPA">WPA/WPA2</option>
+      <option value="WEP">WEP</option>
+      <option value="nopass">None</option>
+    </select>
+    <button onclick="generateWifiQR()">Generate QR</button>
+    <div id="wifiqrcode" class="qr-container"></div>
+    <a id="wifiDownload" class="download-link" download="wifi-qr.png">Download QR</a>
+  </div>
+
+  <!-- Tab 3 -->
+  <div class="tab-content" id="emailTab">
+    <label for="emailTo">Recipient Email:</label>
+    <input type="email" id="emailTo">
+    <label for="emailSubject">Subject:</label>
+    <input type="text" id="emailSubject">
+    <label for="emailBody">Message Body:</label>
+    <textarea id="emailBody" rows="4"></textarea>
+    <button onclick="generateEmailQR()">Generate QR</button>
+    <div id="emailqrcode" class="qr-container"></div>
+    <a id="emailDownload" class="download-link" download="email-qr.png">Download QR</a>
+  </div>
+
+  <!-- Tab 4 -->
+  <div class="tab-content" id="utmTab">
+    <label for="utmBase">Base URL:</label>
+    <input type="url" id="utmBase" placeholder="https://example.com">
+    <label for="utmSource">UTM Source:</label>
+    <input type="text" id="utmSource" placeholder="e.g., newsletter">
+    <label for="utmMedium">UTM Medium:</label>
+    <input type="text" id="utmMedium" placeholder="e.g., email">
+    <label for="utmCampaign">UTM Campaign:</label>
+    <input type="text" id="utmCampaign" placeholder="e.g., spring_sale">
+    <button onclick="generateUtmQR()">Generate QR</button>
+    <div id="utmqrcode" class="qr-container"></div>
+    <a id="utmDownload" class="download-link" download="utm-qr.png">Download QR</a>
+  </div>
+
+  <!-- Tab 5 -->
+  <div class="tab-content" id="eventTab">
+    <label for="eventTitle">Event Title:</label>
+    <input type="text" id="eventTitle">
+    <label for="eventStart">Start Time:</label>
+    <input type="datetime-local" id="eventStart">
+    <label for="eventEnd">End Time:</label>
+    <input type="datetime-local" id="eventEnd">
+    <label for="eventLocation">Location:</label>
+    <input type="text" id="eventLocation">
+    <label for="eventDescription">Description:</label>
+    <textarea id="eventDescription" rows="3"></textarea>
+    <button onclick="generateEventQR()">Generate QR</button>
+    <div id="eventqrcode" class="qr-container"></div>
+    <a id="eventDownload" class="download-link" download="event-qr.png">Download QR</a>
+  </div>
+
+  <!-- Tab 6 -->
+  <div class="tab-content" id="vcardTab">
+    <label for="vcardName">Full Name:</label>
+    <input type="text" id="vcardName">
+    <label for="vcardPhone">Phone Number:</label>
+    <input type="text" id="vcardPhone">
+    <label for="vcardEmail">Email:</label>
+    <input type="email" id="vcardEmail">
+    <label for="vcardCompany">Company:</label>
+    <input type="text" id="vcardCompany">
+    <label for="vcardTitle">Job Title:</label>
+    <input type="text" id="vcardTitle">
+    <button onclick="generateVCardQR()">Generate QR</button>
+    <div id="vcardqrcode" class="qr-container"></div>
+    <a id="vcardDownload" class="download-link" download="vcard-qr.png">Download QR</a>
+  </div>
+
+  <!-- Scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/qrcodejs/qrcode.min.js"></script>
+  <script>
+    function switchTab(tabId, button) {
+      document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+      document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
+      document.getElementById(tabId).classList.add('active');
+      button.classList.add('active');
+    }
+
+    function generateQRCode(text, containerId, linkId) {
+      const container = document.getElementById(containerId);
+      const link = document.getElementById(linkId);
+      container.innerHTML = "";
+      link.style.display = "none";
+      const qr = new QRCode(container, { text, width: 256, height: 256 });
+      setTimeout(() => {
+        const img = container.querySelector("img") || container.querySelector("canvas");
+        const url = img.tagName === "IMG" ? img.src : img.toDataURL("image/png");
+        link.href = url;
+        link.style.display = "inline-block";
+      }, 500);
+    }
+
+    function generateQR(inputId, containerId, linkId) {
+      const value = document.getElementById(inputId).value.trim();
+      if (value) generateQRCode(value, containerId, linkId);
+    }
+
+    function generateWifiQR() {
+      const ssid = document.getElementById("ssid").value;
+      const password = document.getElementById("password").value;
+      const encryption = document.getElementById("encryption").value;
+      const text = `WIFI:T:${encryption};S:${ssid};P:${password};;`;
+      generateQRCode(text, "wifiqrcode", "wifiDownload");
+    }
+
+    function generateEmailQR() {
+      const to = document.getElementById("emailTo").value;
+      const subject = encodeURIComponent(document.getElementById("emailSubject").value);
+      const body = encodeURIComponent(document.getElementById("emailBody").value);
+      const text = `mailto:${to}?subject=${subject}&body=${body}`;
+      generateQRCode(text, "emailqrcode", "emailDownload");
+    }
+
+    function generateUtmQR() {
+      const base = document.getElementById("utmBase").value;
+      const source = document.getElementById("utmSource").value;
+      const medium = document.getElementById("utmMedium").value;
+      const campaign = document.getElementById("utmCampaign").value;
+      const url = `${base}?utm_source=${source}&utm_medium=${medium}&utm_campaign=${campaign}`;
+      generateQRCode(url, "utmqrcode", "utmDownload");
+    }
+
+    function formatDateToUTCString(datetimeLocal) {
+      const dt = new Date(datetimeLocal);
+      return dt.toISOString().replace(/[-:]|\.\d{3}/g, "");
+    }
+
+    function generateEventQR() {
+      const title = document.getElementById("eventTitle").value;
+      const start = formatDateToUTCString(document.getElementById("eventStart").value);
+      const end = formatDateToUTCString(document.getElementById("eventEnd").value);
+      const location = document.getElementById("eventLocation").value;
+      const description = document.getElementById("eventDescription").value;
+      const ics = `BEGIN:VEVENT\nSUMMARY:${title}\nDTSTART:${start}\nDTEND:${end}\nLOCATION:${location}\nDESCRIPTION:${description}\nEND:VEVENT`;
+      const full = `BEGIN:VCALENDAR\nVERSION:2.0\n${ics}\nEND:VCALENDAR`;
+      generateQRCode(full, "eventqrcode", "eventDownload");
+    }
+
+    function generateVCardQR() {
+      const name = document.getElementById("vcardName").value;
+      const phone = document.getElementById("vcardPhone").value;
+      const email = document.getElementById("vcardEmail").value;
+      const company = document.getElementById("vcardCompany").value;
+      const title = document.getElementById("vcardTitle").value;
+      const vcard = `BEGIN:VCARD\nVERSION:3.0\nFN:${name}\nORG:${company}\nTITLE:${title}\nTEL:${phone}\nEMAIL:${email}\nEND:VCARD`;
+      generateQRCode(vcard, "vcardqrcode", "vcardDownload");
+    }
+
+    function toggleTheme() {
+      const body = document.body;
+      const current = body.getAttribute("data-theme");
+      const next = current === "light" ? "dark" : "light";
+      body.setAttribute("data-theme", next);
+      document.getElementById("themeToggle").textContent = next === "light" ? "🌙 Dark Mode" : "☀️ Light Mode";
+    }
+  </script>
+</body>
+</html>
