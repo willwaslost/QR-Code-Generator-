@@ -120,9 +120,12 @@
     button:hover {
       background-color: #00cc9e;
     }
+    .qr-output {
+      text-align: center;
+      margin-top: 2rem;
+    }
     canvas {
-      display: block;
-      margin: 1rem auto;
+      margin: auto;
       background: white;
       padding: 10px;
     }
@@ -186,7 +189,7 @@
       <button onclick="generateQR('vcard')">Generate</button>
     </div>
 
-    <div class="form-section">
+    <div class="qr-output" id="qr-output" style="display:none">
       <canvas id="qrcode"></canvas>
       <button onclick="downloadQR()">Download QR</button>
       <button onclick="clearQR()">Clear QR</button>
@@ -246,6 +249,7 @@
           break;
       }
       qr.value = value;
+      document.getElementById('qr-output').style.display = 'block';
     }
 
     function downloadQR() {
@@ -257,6 +261,7 @@
 
     function clearQR() {
       qr.value = '';
+      document.getElementById('qr-output').style.display = 'none';
     }
 
     function toggleTheme() {
